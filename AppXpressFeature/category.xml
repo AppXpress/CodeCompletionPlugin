@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/appxscripting.feature_1.0.0.qualifier.jar" id="appxscripting.feature" version="1.0.0.qualifier">
+      <category name="appxcategory"/>
+   </feature>
+   <category-def name="appxcategory" label="AppXpress Plugins">
+      <description>
+         AppXpress Plugins
+      </description>
+   </category-def>
+</site>
