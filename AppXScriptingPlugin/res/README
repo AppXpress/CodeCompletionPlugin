@@ -1,4 +1,4 @@
-This purpose o f this plugin is to help the developer with scripting on the AppXpress platform. This is a work in progress and the source code for the plugin is freely available for modification at https://github.com/orgs/AppXpress/.
+The purpose of this plugin is to help the developer with scripting on the AppXpress platform. This is a work in progress and the source code for the plugin is freely available for modification at https://github.com/orgs/AppXpress/CodeCompletionPlugin.
 
 Plugin Features:
 
@@ -9,8 +9,8 @@ The project setup wizard has the following features..
 - Get hints to the attributes of standard documents and custom objects while coding in the Javascript perspective.
 
 Limitations:
-- Doesn't support the following attribute types : PICKLIST, ROOTTYPE and limited support for PARTY
-- Doesn't show READONLY attribute of objects (not all attributes visiable are editable in the system).
+- Doesn't support the following attribute types : PICKLIST, ROOTTYPE
+- Doesn't show READONLY attribute of objects (not all attributes visible are editable in the system).
 
 Example code:
 
