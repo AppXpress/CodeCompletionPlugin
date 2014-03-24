@@ -116,15 +116,33 @@ public class ScriptGenerator {
 		sb.append("function " + objName + "(){");
 		ArrayList<String> listofObjProperties = new ArrayList<String>();
 		listofObjProperties.addAll(mainObject.keySet());
-		// String[] mainObjectKeys = (String[]) mainObject.keySet().toArray();
+		//keep track of party objects for COs in a separate list, since their definition is different
+		ArrayList<String> coPartyList = new ArrayList<String>();
+		
 		for (String key : listofObjProperties) {
 			// console.log("KEY : "+JSON.stringify(key));
 			JSONObject currentJSONObject = mainObject.getJSONObject(key);
 			if (currentJSONObject.getString("type").equalsIgnoreCase("TEXT")) {
-				sb.append("\tthis." + key + " = '';");
+				if(key.split("\\.").length == 2){//is a CO party field
+					String indexKey = key.split("\\.")[0];
+					if(!coPartyList.contains(indexKey)){
+						sb.append("\tthis." + indexKey + " = new Party();");
+						coPartyList.add(indexKey);
+					}
+				}else{
+					sb.append("\tthis." + key + " = '';");
+				}
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"INTEGER")) {
-				sb.append("\tthis." + key + " = 0;");
+				if(key.split("\\.").length == 2){//is a CO party field
+					String indexKey = key.split("\\.")[0];
+					if(!coPartyList.contains(indexKey)){
+						sb.append("\tthis." + indexKey + " = new Party();");
+						coPartyList.add(indexKey);
+					}
+				}else{
+					sb.append("\tthis." + key + " = 0;");
+				}
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"DECIMAL")) {
 				sb.append("\tthis." + key + " = 0.0;");
@@ -170,7 +188,7 @@ public class ScriptGenerator {
 				sb.append("\tthis." + key + " = new Object();");//unkown type
 			}
 		}
-		sb.append("}\n");
+		sb.append("}\n");		
 		String printStr = sb.toString();
 		// System.out.println(printStr);
 		return printStr;

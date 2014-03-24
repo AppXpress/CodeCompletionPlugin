@@ -3,8 +3,8 @@ package appxscripting.wizard;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -71,7 +71,10 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    final String versionStr = _pageTwo.versionSelection.getText();
 	    final String dataKey = _pageTwo.datakeyField.getText();
 	    final String mainObject = _pageThree.mainObjectSelection.getText();
-	    final String[] supportObjects = _pageThree.supportList.getSelection();
+	    final ArrayList<String> supportObjects = new ArrayList<String>(Arrays.asList(_pageThree.supportList.getSelection()));
+	    //add Party as a default support object
+	    if(!supportObjects.contains("party"))
+	    	supportObjects.add("party");
 	    
 		try {
 			this.getContainer().run(true, false,new IRunnableWithProgress(){
