@@ -1,51 +1,66 @@
 package appxscripting.builder;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 public class ScriptGenerator {
 	
+	private static String SCRIPT_FILE_NAME = "platformModuleScript.js";
 	ArrayList<String> parsedObjectList = null;
 	
 	public ScriptGenerator(){
 		parsedObjectList = new ArrayList<String>();
 	}
+	
+    /**
+     * Create script files in the project
+     *
+     * @param newProject
+     * @throws IOException 
+     * @throws CoreException
+     */    
+    private void addScriptFile(IProject newProject, String fileData, String filePath){
+    	InputStream stream;
+		try {
+			stream = new ByteArrayInputStream(fileData.getBytes("UTF-8"));
+			String createdFilePath = filePath;
+	    	IFile file = newProject.getFile(createdFilePath);
+			file.create( stream, true, null );
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 
-	public String buildLibrary(String mainDocJSON,
+	public void buildScripts(IProject project, String mainDocJSON,
 			ArrayList<String> supportDocJSONArr) {// build single library file
-		
-		StringBuilder sb = new StringBuilder();
 		
 		if(mainDocJSON != null){
 			
 		String printSkeletonScript = writeSkeletonScriptForDocument(mainDocJSON);
-		sb.append(printSkeletonScript);
-		
-		sb.append("\n\n");
-		sb.append("//////////////////////////////");
-		sb.append("\n");
-		sb.append("//Development Libraries//");
-		sb.append("\n");
-		sb.append("//////////////////////////////");
-		sb.append("\n");
-		// String devLibrariesSection = sb.toString();
-		// System.out.print(devLibrariesSection);
+		addScriptFile(project, printSkeletonScript, SCRIPT_FILE_NAME);
 
+		createJSLibrariesFromJSON(mainDocJSON, project);
 
-			String printMainObjectLibraries = createJSLibrariesFromJSON(mainDocJSON);
-			sb.append(printMainObjectLibraries);
 		}
 
 		// create js libs from support objects
 		for (String supportDocJSON : supportDocJSONArr) {
-			String printSupportObjectLibraries = createJSLibrariesFromJSON(supportDocJSON);
-			sb.append(printSupportObjectLibraries);
+			createJSLibrariesFromJSON(supportDocJSON, project);
 		}
 
-		//System.out.print(sb.toString());
-		return sb.toString();
 	}
 
 	private String writeSkeletonScriptForDocument(String docJSON) {
@@ -68,20 +83,19 @@ public class ScriptGenerator {
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < eventList.size(); i++) {
+			sb.append("/**\n");
+			sb.append("* @param {"+objName+"} obj\n");
+			sb.append("*/\n");
 			sb.append("function " + eventList.get(i) + "(obj, event, params){\n");
-			sb.append("\tvar " + objName + "Obj = new " + objName + "();\n");
-			sb.append("\t" + objName + "Obj = obj;\n");
-			sb.append("\t//TODO: " + objName + "Obj"
-					+ " property get/set goes here..\n\n");
-			sb.append("\tProviders.getPersistenceProvider().save(" + objName
-					+ "Obj" + ");\n");
+			sb.append("\t//TODO: obj property get/set goes here..\n\n");
+			sb.append("\tProviders.getPersistenceProvider().save(obj);\n");
 			sb.append("}\n");
 		}
 		return sb.toString();
 
 	}
 
-	private String createJSLibrariesFromJSON(String docJSON) {
+	private String createJSLibrariesFromJSON(String docJSON, IProject project) {
 		JSONObject jsonObject = JSONObject.fromObject(docJSON);
 		JSONObject dictionaryJson = jsonObject.getJSONObject("DataDictionary");
 		ArrayList<String> listofObjTypes = new ArrayList<String>();
@@ -91,29 +105,41 @@ public class ScriptGenerator {
 
 		for (int i = 1; i < listofObjTypes.size(); i++) {// skip first node
 															// which is generic
-															// 'type'
-			System.out.println(listofObjTypes.get(i));
+			
+			String objType = listofObjTypes.get(i);
+			if( objType.charAt(0) == "$".toCharArray()[0] )//is custom object
+				objType = objType.substring(1, objType.length());												// 'type'
+			System.out.println(objType);
 			String printStr = parseObject(
 					dictionaryJson.getJSONObject(listofObjTypes.get(i)),
-					listofObjTypes.get(i), listofObjTypes);
-			sb.append(printStr);
+					objType, listofObjTypes);
+			if(printStr != null)
+				addScriptFile(project, printStr, "classes/"+objType+".js");
 		}
 
 		return sb.toString();
+	}
+	
+	private String getObjectTypeFromJSON(String docJSON){
+		JSONObject jsonObject = JSONObject.fromObject(docJSON);
+		JSONObject dictionaryJson = jsonObject.getJSONObject("DataDictionary");
+		String type = dictionaryJson.getString("type");
+		if( type.charAt(0) == "$".toCharArray()[0] )//is custom object
+			type = type.substring(1, type.length());
+		return type;
 	}
 
 	private String parseObject(JSONObject mainObject, String objType,
 			ArrayList<String> listOfOBjTypes) {
 		String objName = objType;
-		if( objName.charAt(0) == "$".toCharArray()[0] )//is custom object
-			objName = objName.substring(1, objName.length());
 		// check if object already parsed, if so skip
 		if (parsedObjectList.contains(objType))
-			return "";
+			return null;
 
 		parsedObjectList.add(objType);// keep record of parsed objects
 		StringBuilder sb = new StringBuilder();
 		sb.append("function " + objName + "(){");
+		sb.append("\n");
 		ArrayList<String> listofObjProperties = new ArrayList<String>();
 		listofObjProperties.addAll(mainObject.keySet());
 		//keep track of party objects for COs in a separate list, since their definition is different
@@ -127,10 +153,12 @@ public class ScriptGenerator {
 					String indexKey = key.split("\\.")[0];
 					if(!coPartyList.contains(indexKey)){
 						sb.append("\tthis." + indexKey + " = new Party();");
+						sb.append("\n");
 						coPartyList.add(indexKey);
 					}
 				}else{
 					sb.append("\tthis." + key + " = '';");
+					sb.append("\n");
 				}
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"INTEGER")) {
@@ -138,6 +166,7 @@ public class ScriptGenerator {
 					String indexKey = key.split("\\.")[0];
 					if(!coPartyList.contains(indexKey)){
 						sb.append("\tthis." + indexKey + " = new Party();");
+						sb.append("\n");
 						coPartyList.add(indexKey);
 					}
 				}else{
@@ -146,12 +175,15 @@ public class ScriptGenerator {
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"DECIMAL")) {
 				sb.append("\tthis." + key + " = 0.0;");
+				sb.append("\n");
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"DATE")) {
 				sb.append("\tthis." + key + " = '';");
+				sb.append("\n");
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"BOOLEAN")) {
 				sb.append("\tthis." + key + " = true;");
+				sb.append("\n");
 			} else if (listOfOBjTypes.contains(currentJSONObject
 					.getString("type"))) {
 				String customObjType = currentJSONObject.getString("type");
@@ -176,16 +208,20 @@ public class ScriptGenerator {
 					System.out.println("iscollection");
 					sb.append("\tthis." + key + " = [ new " + customObjName
 							+ "() ];");
+					sb.append("\n");
 				}else if (isMap == true) {
 					System.out.println("ismap");
 					sb.append("\tthis." + key + " = new Object();");//difficult to handle all cases of maps
+					sb.append("\n");
 				}else {
 					sb.append("\tthis." + key + " = new " + customObjName
 							+ "();");
+					sb.append("\n");
 				}
 			} else {
 				System.out.println("Type '" + key + "' not defined.");
 				sb.append("\tthis." + key + " = new Object();");//unkown type
+				sb.append("\n");
 			}
 		}
 		sb.append("}\n");		

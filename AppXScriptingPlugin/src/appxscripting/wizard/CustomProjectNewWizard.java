@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -95,12 +96,12 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			ScriptGenerator sg = new ScriptGenerator();
-			String scriptFileStr = sg.buildLibrary(mainObjJson, supportObjJSonArr);
 			         
 			System.out.println(location);
-			CustomProjectSupport.createProject(name, location, scriptFileStr);
+			IProject project = CustomProjectSupport.createProject(name, location);
+			
+			ScriptGenerator sg = new ScriptGenerator();
+			sg.buildScripts(project,mainObjJson, supportObjJSonArr);
 			
 			monitor.done();
 			}});

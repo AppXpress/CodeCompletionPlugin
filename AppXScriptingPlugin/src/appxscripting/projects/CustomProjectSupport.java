@@ -27,7 +27,6 @@ public class CustomProjectSupport {
 	private static String BUNDLE_ID = "appxscripting";
 	private static String DEFAULT_FILE_PATH = "res/";
 	private static String README_FILE_NAME = "README";
-	private static String SCRIPT_FILE_NAME = "platformModuleScript.js";
 	
     /**
      * For this project we need to:
@@ -39,13 +38,14 @@ public class CustomProjectSupport {
      * @param location
      * @return
      */
-    public static IProject createProject(String projectName, URI location, String scriptFileStr) {
+    public static IProject createProject(String projectName, URI location) {
  
         IProject project = createBaseProject(projectName, location);
         try {
             addNature(project);
             addProjectFiles(project);
-            addScriptFile(project, scriptFileStr);
+            String[] paths = {"classes"};
+            addToProjectStructure(project,paths);
         } catch (CoreException e) {
             e.printStackTrace();
             project = null;
@@ -137,29 +137,6 @@ public class CustomProjectSupport {
 		try {
 			stream = FileLocator.openStream( bundle, location, false );
 			String createdFilePath = projectPath+fileName;
-	    	IFile file = newProject.getFile(createdFilePath);
-			file.create( stream, true, null );
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
-    
-    /**
-     * Copy the required json files into the project
-     *
-     * @param newProject
-     * @throws IOException 
-     * @throws CoreException
-     */    
-    private static void addScriptFile(IProject newProject, String fileData){
-    	InputStream stream;
-		try {
-			stream = new ByteArrayInputStream(fileData.getBytes("UTF-8"));
-			String createdFilePath = SCRIPT_FILE_NAME;
 	    	IFile file = newProject.getFile(createdFilePath);
 			file.create( stream, true, null );
 		} catch (IOException e) {
