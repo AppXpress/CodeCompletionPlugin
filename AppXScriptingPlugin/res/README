@@ -4,20 +4,10 @@ Plugin Features:
 
 The project setup wizard has the following features..
 - Connects to AppXpress platform and fetches the list of available standard documents and custom objects for scripting
-- Generates a skeleton platform module script for the selected document/object
+- Generates a javascript project with skeleton platform module script for the selected document/object
 - The generated script includes developer libraries with javascript representation of the selected documents/custom objects for scripting.
 - Get hints to the attributes of standard documents and custom objects while coding in the Javascript perspective.
 
 Limitations:
 - Doesn't support the following attribute types : PICKLIST, ROOTTYPE
-- Doesn't show READONLY attribute of objects (not all attributes visible are editable in the system).
-
-Example code:
-
-function objectOnCreateFunction(obj, event, params){
-	var HelloQ5Obj = new HelloQ5();
-	HelloQ5Obj = obj;
-	//TODO: HelloQ5Obj property get/set goes here..
-	HelloQ5Obj.helloId = new Date().getTime();
-	Providers.getPersistenceProvider().save(HelloQ5Obj);
-}
+- Some of the attributes visible via intellisense may not be editable due to READONLY property.
