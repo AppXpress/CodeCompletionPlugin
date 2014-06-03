@@ -17,5 +17,26 @@
             name="AppXpress Wizards">
       </category>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="appxscripting.builder.ClassUpdater"
+            id="appxscripting.builder.command.updater"
+            name="ClassUpdater">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+         <command
+               commandId="appxscripting.builder.command.updater"
+               label="Update Scripts"
+               style="push"
+               tooltip="Update generated classes">
+         </command>
+      </menuContribution>
+   </extension>
 
 </plugin>

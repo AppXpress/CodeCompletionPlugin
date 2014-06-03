@@ -21,6 +21,7 @@ import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import appxscripting.Constants;
 import appxscripting.builder.ScriptGenerator;
 import appxscripting.connections.Connections;
+import appxscripting.preferences.PreferencesStorage;
 import appxscripting.projects.CustomProjectSupport;
 
 public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecutableExtension {
@@ -76,6 +77,16 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    //add Party as a default support object
 	    if(!supportObjects.contains("party"))
 	    	supportObjects.add("party");
+	    
+	    //store plugin info for update access
+	    PreferencesStorage ps = new PreferencesStorage();
+	    ps.saveStoredPref(Constants.PREFS_URL_KEY, urlStr);
+	    ps.saveStoredPref(Constants.PREFS_API_VERSION_KEY, versionStr);
+	    ps.saveStoredPref(Constants.PREFS_DATA_KEY, dataKey);
+	    ps.saveStoredPref(Constants.PREFS_MAIN_OBJ_KEY, mainObject);
+	    ps.saveArrayPrefs(Constants.PREFS_SUP_OBJ_KEY, supportObjects);
+	    System.out.println("Saving auth string: "+ Connections.authStr);
+	    ps.saveStoredPref(Constants.PREFS_AUTH_KEY, Connections.authStr);
 	    
 		try {
 			this.getContainer().run(true, false,new IRunnableWithProgress(){

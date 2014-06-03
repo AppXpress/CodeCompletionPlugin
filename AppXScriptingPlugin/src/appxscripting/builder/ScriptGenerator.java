@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import net.sf.json.JSONException;
@@ -34,7 +35,9 @@ public class ScriptGenerator {
 			stream = new ByteArrayInputStream(fileData.getBytes("UTF-8"));
 			String createdFilePath = filePath;
 	    	IFile file = newProject.getFile(createdFilePath);
-			file.create( stream, true, null );
+	    	if(file.exists())
+	    		file.delete(true, null);
+			file.create( stream, IResource.FORCE, null );
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

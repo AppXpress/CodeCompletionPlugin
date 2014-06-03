@@ -26,5 +26,11 @@ public class Constants {
 	public static String DEFAULT_DATA_KEY = "55b4b8a1a38f2342c95308cc07387a782e5fe61b";
 	public static String DEFAULT_AUTH_STRING = "Basic aHNidXllcjoxMjM0NTY3OA==";
 	public static String[] API_VERSIONS = {"310", "400"};
-
+	
+	public static String PREFS_URL_KEY = "appxurl";
+	public static String PREFS_DATA_KEY = "appxdatakey";
+	public static String PREFS_AUTH_KEY = "appxauth";
+	public static String PREFS_API_VERSION_KEY = "appxversion";
+	public static String PREFS_MAIN_OBJ_KEY = "appxmainobj";
+	public static String PREFS_SUP_OBJ_KEY = "appxsupport";
 }
