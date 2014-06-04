@@ -111,8 +111,8 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 			System.out.println(location);
 			IProject project = CustomProjectSupport.createProject(name, location);
 			
-			ScriptGenerator sg = new ScriptGenerator();
-			sg.buildScripts(project,mainObjJson, supportObjJSonArr);
+			ScriptGenerator sg = new ScriptGenerator(project);
+			sg.buildScripts(mainObjJson, supportObjJSonArr, false);
 			
 			monitor.done();
 			}});

@@ -17,24 +17,25 @@ public class ScriptGenerator {
 	
 	private static String SCRIPT_FILE_NAME = "platformModuleScript.js";
 	ArrayList<String> parsedObjectList = null;
+	IProject project = null;
 	
-	public ScriptGenerator(){
+	public ScriptGenerator(IProject p){
 		parsedObjectList = new ArrayList<String>();
+		project = p;
 	}
 	
     /**
      * Create script files in the project
      *
-     * @param newProject
      * @throws IOException 
      * @throws CoreException
      */    
-    private void addScriptFile(IProject newProject, String fileData, String filePath){
+    private void addScriptFile(String fileData, String filePath){
     	InputStream stream;
 		try {
 			stream = new ByteArrayInputStream(fileData.getBytes("UTF-8"));
 			String createdFilePath = filePath;
-	    	IFile file = newProject.getFile(createdFilePath);
+	    	IFile file = project.getFile(createdFilePath);
 	    	if(file.exists())
 	    		file.delete(true, null);
 			file.create( stream, IResource.FORCE, null );
@@ -47,23 +48,31 @@ public class ScriptGenerator {
 		}
     }
 
-	public void buildScripts(IProject project, String mainDocJSON,
-			ArrayList<String> supportDocJSONArr) {// build single library file
+	public void buildScripts(String mainDocJSON,
+			ArrayList<String> supportDocJSONArr, boolean isUpdate) {// build single library file
 		
 		if(mainDocJSON != null){
 			
-		String printSkeletonScript = writeSkeletonScriptForDocument(mainDocJSON);
-		addScriptFile(project, printSkeletonScript, SCRIPT_FILE_NAME);
+		if(!isUpdate){	
+			String printSkeletonScript = writeSkeletonScriptForDocument(mainDocJSON);
+			addScriptFile( printSkeletonScript, SCRIPT_FILE_NAME);
+		}
 
-		createJSLibrariesFromJSON(mainDocJSON, project);
+		createJSLibrariesFromJSON(mainDocJSON);
 
 		}
 
 		// create js libs from support objects
 		for (String supportDocJSON : supportDocJSONArr) {
-			createJSLibrariesFromJSON(supportDocJSON, project);
+			createJSLibrariesFromJSON(supportDocJSON);
 		}
-
+		
+		//create default scripts
+		createPartyMapClass();
+		createDateMapClass();
+		createItemIdentifierMap();
+		createItemDateMap();
+		createItemDescriptorMap();
 	}
 
 	private String writeSkeletonScriptForDocument(String docJSON) {
@@ -98,7 +107,7 @@ public class ScriptGenerator {
 
 	}
 
-	private String createJSLibrariesFromJSON(String docJSON, IProject project) {
+	private String createJSLibrariesFromJSON(String docJSON) {
 		JSONObject jsonObject = JSONObject.fromObject(docJSON);
 		JSONObject dictionaryJson = jsonObject.getJSONObject("DataDictionary");
 		ArrayList<String> listofObjTypes = new ArrayList<String>();
@@ -117,7 +126,7 @@ public class ScriptGenerator {
 					dictionaryJson.getJSONObject(listofObjTypes.get(i)),
 					objType, listofObjTypes);
 			if(printStr != null)
-				addScriptFile(project, printStr, "classes/"+objType+".js");
+				addScriptFile(printStr, "classes/"+objType+".js");
 		}
 
 		return sb.toString();
@@ -213,9 +222,41 @@ public class ScriptGenerator {
 							+ "() ];");
 					sb.append("\n");
 				}else if (isMap == true) {
+					//known map types..
+					//party - ok
+					//order date - ok
+					//reference - orderterms - not added
+					//additionalDocumentRequired - not added
+					//itemIdentifier - base item - ok
+					//itemDescriptor - base item - ok
+					//item date - base item - ok
+					//party - identification - not added
+					//party reference - not added
 					System.out.println("ismap");
-					sb.append("\tthis." + key + " = new Object();");//difficult to handle all cases of maps
-					sb.append("\n");
+					if(customObjName.equalsIgnoreCase("party")){//is a map of party objects
+						sb.append("\tthis." + key + " = new PartyMap();");
+						sb.append("\n");
+					}
+					else if(customObjName.equalsIgnoreCase("orderDate") || customObjName.equalsIgnoreCase("invoiceDate")){
+						sb.append("\tthis." + key + " = new DateMap();");
+						sb.append("\n");
+					}
+					else if(customObjName.equalsIgnoreCase("itemIdentifier")){
+						sb.append("\tthis." + key + " = new ItemIdentifierMap();");
+						sb.append("\n");
+					}
+					else if(customObjName.equalsIgnoreCase("itemDate")){
+						sb.append("\tthis." + key + " = new ItemDateMap();");
+						sb.append("\n");
+					}
+					else if(customObjName.equalsIgnoreCase("itemDescriptor")){
+						sb.append("\tthis." + key + " = new ItemDescriptorMap();");
+						sb.append("\n");
+					}
+					else{
+						sb.append("\tthis." + key + " = new Object();");//difficult to handle all cases of maps
+						sb.append("\n");
+					}
 				}else {
 					sb.append("\tthis." + key + " = new " + customObjName
 							+ "();");
@@ -232,7 +273,68 @@ public class ScriptGenerator {
 		// System.out.println(printStr);
 		return printStr;
 	}
+	
+	private void createPartyMapClass(){
+		String[] partyRoleArray = {"AdditionalParty","Beneficiary","BillOfLadingIssuer","BillTo","BondHolder","BookingParty","Buyer","BuyersAgent","Carrier","Consignee","Consignor","Consolidator","ContainerStuffingLocation","CounterParty","CoverageProvider","CustomsBroker","FilingImporter","FilingProvider","FinalDestination","FinalReceiver","FinanceProvider","Importer","InspectionCompany","IntermediateDestination","IssuedTo1","IssuedTo2","IssuedTo3","IssuedTo4","IssuedTo5","LogisticsProvider","Message","NotifyParty1","NotifyParty2","OriginOfGoods","Owner","Payer","PaymentProvider","PrintServiceProvider","ReceivedBy","Receiver","RepresentedBeneficiary","RepresentedPayer","RequestedBy","Requester","Seller","SellersAgent","Sender","ShipTo","ShipmentDestination","TransferTo"};
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("function PartyMap(){\n");
+		for (String partyRole : partyRoleArray) {
+			sb.append("\tthis."+partyRole+" = [ new Party() ];\n");
+		}
+		sb.append("}\n");
+		
+		addScriptFile( sb.toString(), "classes/PartyMap.js");
+	}
+	
+	private void createDateMapClass(){
+		String[] dateTypeArray = {"CancelAfter","Earliest","Issue","Latest","OfferExpiry"};
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("function DateMap(){\n");
+		for (String dateRole : dateTypeArray) {
+			sb.append("\tthis."+dateRole+" = '';\n");
+		}
+		sb.append("}\n");
+		
+		addScriptFile( sb.toString(), "classes/DateMap.js");
+	}
+	
+	private void createItemIdentifierMap(){
+		String[] itemIdentifierMap = {"BuyerNumber", "CountryOfOrigin", "ItemSequenceNumber", "Level", "LotNumber", "QuotaCategory", "SellerNumber", "ShortDescription", "SkuNumber", "UpcNumber"};
+		StringBuilder sb = new StringBuilder();
+		sb.append("function ItemIdentifierMap(){\n");
+		for (String itemId : itemIdentifierMap) {
+			sb.append("\tthis."+itemId+" = '';\n");
+		}
+		sb.append("}\n");
+		
+		addScriptFile( sb.toString(), "classes/ItemIdentifierMap.js");
+	}
+	
+	private void createItemDateMap(){
+		String[] itemDateMap = {"EarliestDate", "LatestDate"};
+		StringBuilder sb = new StringBuilder();
+		sb.append("function ItemDateMap(){\n");
+		for (String item : itemDateMap) {
+			sb.append("\tthis."+item+" = '';\n");
+		}
+		sb.append("}\n");
+		
+		addScriptFile( sb.toString(), "classes/ItemDateMap.js");
+	}
 
+	private void createItemDescriptorMap(){
+		String[] itemMap = {"LongDescription"};
+		StringBuilder sb = new StringBuilder();
+		sb.append("function ItemDescriptorMap(){\n");
+		for (String item : itemMap) {
+			sb.append("\tthis."+item+" = '';\n");
+		}
+		sb.append("}\n");
+		
+		addScriptFile( sb.toString(), "classes/ItemDescriptorMap.js");
+	}
 
 	
 }

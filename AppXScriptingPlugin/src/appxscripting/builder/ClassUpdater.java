@@ -90,8 +90,8 @@ public class ClassUpdater extends AbstractHandler {
 
 	private void updateScriptFiles(IProject project, String mainObjJson,
 			ArrayList<String> supportObjJSonArr) {
-		ScriptGenerator sg = new ScriptGenerator();
-		sg.buildScripts(project, mainObjJson, supportObjJSonArr);
+		ScriptGenerator sg = new ScriptGenerator(project);
+		sg.buildScripts(mainObjJson, supportObjJSonArr, true);
 	}
 
 }
