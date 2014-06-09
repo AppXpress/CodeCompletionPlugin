@@ -27,6 +27,8 @@ public class CustomProjectSupport {
 	private static String BUNDLE_ID = "appxscripting";
 	private static String DEFAULT_FILE_PATH = "res/";
 	private static String README_FILE_NAME = "README";
+	private static String PROVIDER_SCRIPT_FILE_NAME = "ProviderClass.js";
+	private static String CLASSES_FOLDER = "classes";
 	
     /**
      * For this project we need to:
@@ -43,9 +45,9 @@ public class CustomProjectSupport {
         IProject project = createBaseProject(projectName, location);
         try {
             addNature(project);
-            addProjectFiles(project);
-            String[] paths = {"classes"};
+            String[] paths = {CLASSES_FOLDER};
             addToProjectStructure(project,paths);
+            addProjectFiles(project);
         } catch (CoreException e) {
             e.printStackTrace();
             project = null;
@@ -120,6 +122,8 @@ public class CustomProjectSupport {
     private static void addProjectFiles(IProject newProject){
     	//add README file
     	addProjectFile(newProject , README_FILE_NAME , "" );
+    	//add ProviderClass
+    	addProjectFile(newProject , PROVIDER_SCRIPT_FILE_NAME , CLASSES_FOLDER+"/" );
     }
     
     /**
