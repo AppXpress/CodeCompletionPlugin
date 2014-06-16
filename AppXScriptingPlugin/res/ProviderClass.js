@@ -135,23 +135,24 @@ function ProviderObject(){
 	
 	
 	function PlatformFetchRequest(){
-		
-		/**
-		 * @param {String} key
-		 * @param {String} value
-		 * @returns {PlatformFetchRequest}
-		 */
-		this.addParameter = function(key,value){
-			return this;
-		};
-		
-		/**
-		 * @param {Number} apiVersion
-		 * @returns {PlatformFetchRequest}
-		 */
-		this.apiVersion = function(apiVersion){
-			return this;
-		};
+	
+		//Commented out because javascript doesnt support method overloading
+//		/**
+//		 * @param {String} key
+//		 * @param {String} value
+//		 * @returns {PlatformFetchRequest}
+//		 */
+//		this.addParameter = function(key,value){
+//			return this;
+//		};
+//		
+//		/**
+//		 * @param {Number} apiVersion
+//		 * @returns {PlatformFetchRequest}
+//		 */
+//		this.apiVersion = function(apiVersion){
+//			return this;
+//		};
 
 		/**
 		 * @param {String} resource - For example to retrieve attachments details: resource("attachments")
