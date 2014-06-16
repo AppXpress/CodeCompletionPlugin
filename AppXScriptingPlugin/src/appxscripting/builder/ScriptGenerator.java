@@ -173,7 +173,8 @@ public class ScriptGenerator {
 					sb.append("\n");
 				}
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
-					"INTEGER")) {
+					"INTEGER") || currentJSONObject.getString("type").equalsIgnoreCase(
+							"NUMBER")) {
 				if(key.split("\\.").length == 2){//is a CO party field
 					String indexKey = key.split("\\.")[0];
 					if(!coPartyList.contains(indexKey)){
@@ -183,6 +184,7 @@ public class ScriptGenerator {
 					}
 				}else{
 					sb.append("\tthis." + key + " = 0;");
+					sb.append("\n");
 				}
 			} else if (currentJSONObject.getString("type").equalsIgnoreCase(
 					"DECIMAL")) {
