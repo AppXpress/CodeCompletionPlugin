@@ -9,8 +9,12 @@ public class Connections {
 	
 	public static String authStr = "";//this is set from username & pwd from connection wizard page
 
-	public static String sendGet(String url, String versionStr, String objName, String dataKey) throws Exception {
+	public static String sendGet(String url, String versionStr, String objName, String uid, String dataKey) throws Exception {
 		StringBuffer response = new StringBuffer();
+		
+		if(uid != null){
+			objName = objName + "/"+ uid;
+		}
 		
 		String urlStr = url +"/rest/"+versionStr+"/"+objName+"?dataKey="+dataKey;
 		System.out.println("URL : "+urlStr);

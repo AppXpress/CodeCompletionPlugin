@@ -12,6 +12,9 @@ public class Constants {
 	public static String PAGE_THREE_NAME = "Scripting object selection";
 	public static String PAGE_THREE_TITLE = "Setup scripting";
 	public static String PAGE_THREE_DESC = "Select objects for scripting.";
+	public static String PAGE_FOUR_NAME = "Test object selection";
+	public static String PAGE_FOUR_TITLE = "Set reference objects";
+	public static String PAGE_FOUR_DESC = "Provide the uids of the objects that will be used as a reference for the script.";
 	
 	public static String PAGE_TWO_LABEL_URL = "Server base url:";
 	public static String PAGE_TWO_API_VERSION = "API Version:";
@@ -21,8 +24,8 @@ public class Constants {
 	
 	public static String PAGE_THREE_SCRIPT_FOR = "Script for:";
 	public static String PAGE_THREE_SUPPORT_LIST = "Support objects:";
-	
-	public static String DEFAULT_URL = "http://commerce.qa2.tradecard.com";
+
+	public static String DEFAULT_URL = "http://commerce.qa.tradecard.com";
 	public static String DEFAULT_DATA_KEY = "55b4b8a1a38f2342c95308cc07387a782e5fe61b";
 	public static String DEFAULT_AUTH_STRING = "Basic aHNidXllcjoxMjM0NTY3OA==";
 	public static String[] API_VERSIONS = {"310", "400"};
@@ -33,4 +36,5 @@ public class Constants {
 	public static String PREFS_API_VERSION_KEY = "appxversion";
 	public static String PREFS_MAIN_OBJ_KEY = "appxmainobj";
 	public static String PREFS_SUP_OBJ_KEY = "appxsupport";
+	public static String PREFS_MAIN_OBJ_UID = "appxmainobjuid";
 }

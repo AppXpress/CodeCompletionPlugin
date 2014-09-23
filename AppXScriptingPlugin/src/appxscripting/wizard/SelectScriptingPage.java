@@ -116,7 +116,7 @@ public class SelectScriptingPage extends WizardPage {
 
 	public IWizardPage getNextPage() {
 		IWizardPage nextPage = super.getNextPage();
-		if (nextPage == null) {// select scripting objects page is the final
+		if (nextPage.getName() == Constants.PAGE_FOUR_NAME) {// select scripting objects page is the final
 								// page in the wizard
 			System.out.println("Select scripting page called");
 			CustomProjectNewWizard wiz = (CustomProjectNewWizard) getWizard();
@@ -145,7 +145,7 @@ public class SelectScriptingPage extends WizardPage {
 									try {
 										Connections.authStr = authStr;//set static auth string value during first access
 										objectListStr = Connections.sendGet(urlStr, versionStr,
-												"", dataKeyStr);
+												"", null, dataKeyStr);
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();

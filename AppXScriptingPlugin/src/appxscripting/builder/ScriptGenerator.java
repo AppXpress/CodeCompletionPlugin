@@ -49,7 +49,7 @@ public class ScriptGenerator {
     }
 
 	public void buildScripts(String mainDocJSON,
-			ArrayList<String> supportDocJSONArr, boolean isUpdate) {// build single library file
+			ArrayList<String> supportDocJSONArr, String refDocJSON, boolean isUpdate) {// build single library file
 		
 		if(mainDocJSON != null){
 			
@@ -60,6 +60,13 @@ public class ScriptGenerator {
 
 		createJSLibrariesFromJSON(mainDocJSON);
 
+		}
+		
+		if(refDocJSON != null){
+			JSONObject refDocObj = JSONObject.fromObject(refDocJSON);
+			String refDocJSONStr = refDocObj.toString(3);
+			//refDocJSONStr.replaceAll("\\{", "\\{\\n");
+			addScriptFile( refDocJSONStr, "classes/REF.json");
 		}
 
 		// create js libs from support objects

@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import net.sf.json.JSONObject;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -29,7 +31,9 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	private WizardNewProjectCreationPage _pageOne;
 	private ConnectToServerPage _pageTwo;
 	private SelectScriptingPage _pageThree;
+	private TestObjectsPage _pageFour;
 	private IConfigurationElement _configurationElement;
+	public String mainObjectType;
 	
 	public CustomProjectNewWizard() {
 		setWindowTitle(Constants.WIZARD_TITLE);
@@ -52,7 +56,8 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    SelectScriptingPage pageThree = (SelectScriptingPage)getPages()[2];
 	    String mainObjectVal = pageThree.mainObjectSelection.getText();
 	    System.out.println(mainObjectVal);
-		if(currentWizardPage == Constants.PAGE_THREE_NAME){// && mainObjectVal) != null  && mainObjectVal.length() > 0){
+	    mainObjectType = mainObjectVal;
+		if(currentWizardPage == Constants.PAGE_THREE_NAME || currentWizardPage == Constants.PAGE_FOUR_NAME ){// && mainObjectVal) != null  && mainObjectVal.length() > 0){
 			System.out.println("Can finish");
 			return true;
 		}
@@ -73,6 +78,7 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    final String versionStr = _pageTwo.versionSelection.getText();
 	    final String dataKey = _pageTwo.datakeyField.getText();
 	    final String mainObject = _pageThree.mainObjectSelection.getText();
+	    final String mainObjectUid = _pageFour.mainIdField.getText();
 	    final ArrayList<String> supportObjects = new ArrayList<String>(Arrays.asList(_pageThree.supportList.getSelection()));
 	    //add Party as a default support object
 	    if(!supportObjects.contains("party"))
@@ -85,6 +91,7 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    ps.saveStoredPref(Constants.PREFS_DATA_KEY, dataKey);
 	    ps.saveStoredPref(Constants.PREFS_MAIN_OBJ_KEY, mainObject);
 	    ps.saveArrayPrefs(Constants.PREFS_SUP_OBJ_KEY, supportObjects);
+	    ps.saveStoredPref(Constants.PREFS_MAIN_OBJ_UID, mainObjectUid);
 	    System.out.println("Saving auth string: "+ Connections.authStr);
 	    ps.saveStoredPref(Constants.PREFS_AUTH_KEY, Connections.authStr);
 	    
@@ -95,14 +102,18 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 			
 
 			String mainObjJson = null;
+			String refObjJson = null;
 			ArrayList<String> supportObjJSonArr = new ArrayList<String>();
 			try {
-				mainObjJson = Connections.sendGet(urlStr,versionStr, mainObject, dataKey);
+				mainObjJson = Connections.sendGet(urlStr,versionStr, mainObject, null, dataKey);
 				System.out.println("Main object : "+mainObjJson);
 				for (String s : supportObjects) {
-					String supObjJson = Connections.sendGet(urlStr, versionStr, s, dataKey);
+					String supObjJson = Connections.sendGet(urlStr, versionStr, s, null, dataKey);
 					System.out.println("Support object : "+supObjJson);
 					supportObjJSonArr.add(supObjJson);
+				}
+				if(mainObjectUid != null && mainObjectUid.trim().length() > 0){
+					refObjJson = Connections.sendGet(urlStr, versionStr, mainObject, mainObjectUid, dataKey);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -112,7 +123,7 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 			IProject project = CustomProjectSupport.createProject(name, location);
 			
 			ScriptGenerator sg = new ScriptGenerator(project);
-			sg.buildScripts(mainObjJson, supportObjJSonArr, false);
+			sg.buildScripts(mainObjJson, supportObjJSonArr, refObjJson, false);
 			
 			monitor.done();
 			}});
@@ -148,6 +159,11 @@ public class CustomProjectNewWizard extends Wizard implements INewWizard, IExecu
 	    _pageThree.setTitle(Constants.PAGE_THREE_TITLE);
 	    _pageThree.setDescription(Constants.PAGE_THREE_DESC);
 	    addPage(_pageThree);
+	    
+	    _pageFour = new TestObjectsPage(Constants.PAGE_FOUR_NAME);
+	    _pageFour.setTitle(Constants.PAGE_FOUR_TITLE);
+	    _pageFour.setDescription(Constants.PAGE_FOUR_DESC);
+	    addPage(_pageFour);
 	}
 
 }

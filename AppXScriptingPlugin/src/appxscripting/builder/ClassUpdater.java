@@ -70,12 +70,12 @@ public class ClassUpdater extends AbstractHandler {
 			Connections.authStr = ps.getStoredPref(Constants.PREFS_AUTH_KEY);
 			ArrayList<String> supportObjects = ps
 					.getArrayPrefs(Constants.PREFS_SUP_OBJ_KEY);
-			mainObjJson = Connections.sendGet(urlStr, versionStr, mainObject,
+			mainObjJson = Connections.sendGet(urlStr, versionStr, mainObject,null,
 					dataKey);
 			System.out.println("Main object : " + mainObjJson);
 			for (String s : supportObjects) {
 				s = s.trim();//remove any whitespaces
-				String supObjJson = Connections.sendGet(urlStr, versionStr, s,
+				String supObjJson = Connections.sendGet(urlStr, versionStr, s, null,
 						dataKey);
 				System.out.println("Support object : " + supObjJson);
 				if (supObjJson != null)
@@ -91,7 +91,7 @@ public class ClassUpdater extends AbstractHandler {
 	private void updateScriptFiles(IProject project, String mainObjJson,
 			ArrayList<String> supportObjJSonArr) {
 		ScriptGenerator sg = new ScriptGenerator(project);
-		sg.buildScripts(mainObjJson, supportObjJSonArr, true);
+		sg.buildScripts(mainObjJson, supportObjJSonArr, null, true);
 	}
 
 }
